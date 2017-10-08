@@ -1,0 +1,14 @@
+ansible webservers -i inventory_prod -m user -a "name=siluser remove=yes state=absent" --sudo
+ansible webservers -i inventory_prod -m user -a "name=siluser password=12345" --sudo
+ansible webservers -i inventory_prod -m yum -a "name=httpd state=absent" --sudo
+ansible webservers -i inventory_prod -m service -a "name=httpd enabled=yes state=started" --sudo
+ansible dbservers -i inventory_prod -m yum -a "name=mysql-server state=started" --sudo
+ansible dbservers -i inventory_prod -m service -a "name=mysqld state=started enabled=yes" --sudo
+
+#Since webserver didn't start
+
+ansible webservers:dbservers -i inventory_prod -m service -a "name=iptables state=stopped" --sudo
+ansible web1 -i inventory_prod -m setup -a "filter=ansible_eth"
+ansible web1 -i inventory_prod -m setup -a "filter=ansible_mounts"
+
+ansible web1 -i inventory_prod -m setup --tree --pretty ./setup
